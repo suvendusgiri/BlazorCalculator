@@ -1,0 +1,97 @@
+﻿@page "/calculator"
+
+    <h1>Calculator</h1>
+    <form name="calculator">
+        <div class="container">
+            <div class="calc-body">
+                <div class="calc-screen">
+                    <div class="calc-operation">123485+234132-1213x909</div>
+                    <div class="calc-typed">@inputDisplay<span class="blink-me">_</span></div>
+                </div>
+                <div class="calc-button-row">
+                    <div class="calc-button-wide c" onclick="@ClearDisplay">C</div>
+                    @*<div class="calc-button l">≠</div>*@
+                    <div class="calc-button l">%</div>
+                    <div class="calc-button l" onclick="@(()=>AppendInput("/"))">/</div>
+                </div>
+                <div class="calc-button-row">
+                    <div class="calc-button" onclick="@(()=>AppendInput("7"))">7</div>
+                    <div class="calc-button" onclick="@(()=>AppendInput("8"))">8</div>
+                    <div class="calc-button" onclick="@(()=>AppendInput("9"))">9</div>
+                    <div class="calc-button l" onclick="@(()=>AppendInput("X"))">x</div>
+                </div>
+                <div class="calc-button-row">
+                    <div class="calc-button" onclick="@(()=>AppendInput("4"))">4</div>
+                    <div class="calc-button" onclick="@(()=>AppendInput("5"))">5</div>
+                    <div class="calc-button" onclick="@(()=>AppendInput("6"))">6</div>
+                    <div class="calc-button l" onclick="@(()=>AppendInput("-"))">−</div>
+                </div>
+                <div class="calc-button-row">
+                    <div class="calc-button" onclick="@(()=>AppendInput("1"))">1</div>
+                    <div class="calc-button" onclick="@(()=>AppendInput("2"))">2</div>
+                    <div class="calc-button" onclick="@(()=>AppendInput("3"))">3</div>
+                    <div class="calc-button l" onclick="@(()=>AppendInput("+"))">+</div>
+                </div>
+                <div class="calc-button-row">
+                    <div class="calc-button" onclick="@(()=>AppendInput("."))">.</div>
+                    <div class="calc-button" onclick="@(()=>AppendInput("0"))">0</div>
+                    <div class="calc-button">
+                        <
+                    </div>
+                    <div class="calc-button l" onclick="@EvaluateExpression">=</div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @functions {
+    string inputDisplay = "";
+    bool isResult = false;
+    readonly char[] numbers = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    readonly char[] symbols = { '/', 'X', '+', '-', '%', '.' };
+
+
+    void ClearDisplay()
+    {
+        inputDisplay = string.Empty;
+    }
+
+    void AppendInput(string inputValue)
+    {
+        double numValue;
+        //disallow consecutive operators
+        if (!double.TryParse(inputValue, out numValue) && inputDisplay.Substring(inputDisplay.Length - 1).IndexOfAny(symbols) != -1)
+        {
+            return;
+        }
+        //disallow mutiple 0s
+        if (inputDisplay.Trim() == "0" && inputValue == "0")
+        {
+            return;
+        }
+        //disallow multiple decimal points for single input
+        //disallow 0 as input
+
+        if (isResult & double.TryParse(inputValue, out numValue))
+        {
+            inputDisplay = inputValue;
+
+        }
+        else
+        {
+            inputDisplay += inputValue;
+        }
+        isResult = false;
+    }
+
+    void EvaluateExpression()
+    {
+
+        string valueToEvaluate = inputDisplay.Replace('X', '*');
+        System.Data.DataTable dataTable = new System.Data.DataTable();
+        var finalResult = dataTable.Compute(valueToEvaluate, "");
+        inputDisplay = finalResult.ToString();
+        isResult = true;
+    }
+}
+
